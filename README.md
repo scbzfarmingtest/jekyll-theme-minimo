@@ -89,7 +89,7 @@
 4. [Liquid中文网](https://liquid.bootcss.com/)
 5. [Liquid官网文档](https://shopify.dev/api/liquid/)
 6. [Linux文档，die.net制作](https://linux.die.net/)
-7. [Shell 教程 |鸟教程](https://www.runoob.com/linux/linux-shell.html)
+7. [Shell 教程 |菜鸟教程](https://www.runoob.com/linux/linux-shell.html)
 8. [Github文档](https://docs.github.com/en)
     主要参考了Actions（尤CI/CD和workflows）以及Github Pages的机制。
 
