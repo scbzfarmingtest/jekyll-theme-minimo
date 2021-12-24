@@ -1,0 +1,158 @@
+#!/bin/bash
+
+tag() {
+
+    read -p "Single tag?(y/n):" istag
+
+    if [[ $istag = "y" ]]; then
+        read -p "Please Enter Tag/Tags(SingleTag/tag1--tag2--tag3):" tag
+        echo "tag: $tag" >>$Title
+        return 1
+    elif [[ $istag = "n" ]]; then
+        read -p "Please Enter Tag/Tags(SingleTag/tag1--tag2--tag3):" tag
+        echo "tags: [${tag//--/, }]" >>$Title
+        return 1
+    else
+        echo -e "\n\033[41;37;1mERROR:x2 \033[0m Wrong Tag/Tags format!"
+        echo -e "\nInput \"t\" to re-input tag/tags"
+        echo -e "Input \"r\" to restart"
+        echo -e "Input other to quit"
+        read Ex2
+        if [[ $Ex2 = "t" ]]; then
+            return 0
+        elif [[ $Ex2 = "r" ]]; then
+            return 10
+        else
+            rm $Title
+            exit
+        fi
+    fi
+}
+
+category() {
+
+    read -p "Single category?(y/n):" iscategory
+
+    if [[ $iscategory = "y" ]]; then
+        read -p "Please Enter Category/Categories(SingleCategory/category1--category2--category3):" category
+        echo "category: $category" >>$Title
+        return 1
+    elif [[ $iscategory = "n" ]]; then
+        read -p "Please Enter Category/Categories(SingleCategory/category1--category2--category3):" category
+        echo "categories: [${category//--/, }]" >>$Title
+        return 1
+    else
+        echo -e "\n\033[41;37;1mERROR:x3 \033[0m Wrong Category/Categories format!"
+        echo -e "\nInput \"t\" to re-input category/categories"
+        echo -e "Input \"r\" to restart"
+        echo -e "Input other to quit"
+        read Ex2
+        if [[ $Ex2 = "t" ]]; then
+            return 0
+        elif [[ $Ex2 = "r" ]]; then
+            return 10
+        else
+            rm $Title
+            exit
+        fi
+    fi
+}
+
+newpost() {
+    read -p "Please Enter New Post Title:" title
+    Title=_posts/$(date '+%Y-%m-%d')-$title.md
+    ttitle=$(date '+%Y-%m-%d')-$title.md
+    TTitle=$Title.md_backup
+    if [ -e "$Title" ]; then
+        echo -e "\n\033[41;37;1mERROR:x1 \033[0m Exist post with same title generated today!"
+        echo -e "\nInput \"r\" to restart"
+        echo -e "Input \"b\" to backup old post and continue creating new post"
+        echo -e "Input \"o\" to overwrite old post (delete old and create new)"
+        echo -e "Input others to quit"
+        read Ex1
+        if [[ $Ex1 = "r" ]]; then
+            return 0
+        elif [[ $Ex1 = "b" ]]; then
+            mv -b $Title "$Title"_backup
+            if [[ $? ]]; then
+                echo -e "\033[36;1mSuccessfully backed up!\033[0m"
+            fi
+        elif [[ $Ex1 = "o" ]]; then
+            mv -b $Title 'C:\$RECYCLE.BIN\'$ttitle
+            if [[ $? ]]; then
+                echo -e "\033[36;1mSuccessfully overwrite! Old file is in C:\\\$RECYCLE.BIN \033[0m"
+            fi
+        else
+            echo "exit"
+            exit
+        fi
+    fi
+
+    echo "---
+layout: post
+title: $title
+date: $(date '+%Y-%m-%d %z')" >$Title
+
+    tag
+    REx2=$?
+    while (( $REx2 == 0 )); do
+        tag
+        REx2=$?
+    done
+    if [[ $REx2 == 10 ]]; then
+        rm -f $Title
+        if [[ $? ]]; then
+            echo -e "\033[36;1mSuccessfully delete useless file and restart!\033[0m"
+        fi
+        return 0
+    elif [[ $REx2 == 0 ]]; then
+        echo "???"
+    fi
+
+    category
+    REx3=$?
+    while (( $REx3 == 0 )); do
+        category
+        REx3=$?
+    done
+    if [[ $REx3 == 10 ]]; then
+        rm -f $Title
+        if [[ $? ]]; then
+            echo -e "\033[36;1mSuccessfully delete useless file and restart!\033[0m"
+        fi
+        return 0
+    elif [[ $REx3 == 0 ]]; then
+        echo "???"
+    fi
+
+    echo -e "---\n" >>$Title
+
+    echo -e "\033[36;1m\nCongratulations! New post as $Title \033[0m
+Input \"r\" to undo and restart
+Input \"d\" to undo and delete new post
+Input others to quit and open new post"
+
+    read ifRDQ
+
+    if [[ $ifRDQ = "r" ]]; then
+        rm -f $Title
+        echo -e "Restarting Script..."
+        return 0
+    elif [[ $ifRDQ = "d" ]]; then
+        rm -f $Title
+        if [[ $? ]]; then
+            echo -e "\033[34;1m\nNew post DELETED! \033[0m"
+        fi
+        return 1
+    else
+        echo -e "\033[36;1m\nCongratulations!
+Opening new post... \033[0m"
+        start $Title
+        return 1
+    fi
+}
+
+newpost
+while (( $? == 0 )); do
+    newpost
+done
